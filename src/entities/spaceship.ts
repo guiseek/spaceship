@@ -1,6 +1,6 @@
 import {Group, Vector3, Quaternion} from 'three'
 import {AudioControl, Input, Loader} from '../core'
-import {onProgress} from '../utilities'
+import {isMobile, onProgress} from '../utilities'
 
 export class Spaceship extends Group {
   #input = new Input()
@@ -31,10 +31,16 @@ export class Spaceship extends Group {
     }
   }
 
-  update(deltaTime: number): void {
+  update(deltaTime: number) {
     const alpha = Math.min(4 * deltaTime, 1)
 
-    this.handleInput()
+    if (isMobile()) {
+      this.#input.onRotation = (deviceRotation) => {
+        this.#currentRotation.copy(deviceRotation)
+      }
+    } else {
+      this.handleInput()
+    }
 
     this.rotateSmoothly(alpha)
 
@@ -43,7 +49,7 @@ export class Spaceship extends Group {
     this.#audio.update()
   }
 
-  handleInput(): void {
+  handleInput() {
     if (this.#input.key.A) {
       this.toLeft(this.#rotationAngle)
     }
@@ -72,10 +78,6 @@ export class Spaceship extends Group {
     } else {
       this.#audio.setVolume(0.5)
     }
-
-    this.#input.onRotation = (deviceRotation) => {
-      this.quaternion.copy(deviceRotation)
-    }
   }
 
   toUp(angle: number) {
@@ -86,25 +88,25 @@ export class Spaceship extends Group {
     this.rotateX(angle)
   }
 
-  toLeft(angle: number): void {
+  toLeft(angle: number) {
     const quaternion = new Quaternion().setFromAxisAngle(this.#yaw, angle)
     this.#currentRotation.multiply(quaternion)
     this.rotateZ(-angle)
   }
 
-  toRight(angle: number): void {
+  toRight(angle: number) {
     const quaternion = new Quaternion().setFromAxisAngle(this.#yaw, -angle)
     this.#currentRotation.multiply(quaternion)
     this.rotateZ(angle)
   }
 
-  rotateSmoothly(alpha: number): void {
+  rotateSmoothly(alpha: number) {
     const quaternion = new Quaternion()
     quaternion.slerpQuaternions(this.quaternion, this.#currentRotation, alpha)
     this.quaternion.copy(quaternion)
   }
 
-  toForward(speed = 0): void {
+  toForward(speed = 0) {
     const currentSpeed = Math.min(speed + this.#acceleration, this.#maxSpeed)
     const direction = new Vector3(0, 0, -1).applyQuaternion(this.quaternion)
     this.position.addScaledVector(direction, -currentSpeed)
