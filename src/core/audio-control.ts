@@ -15,8 +15,9 @@ export class AudioControl {
 
   constructor(src: string) {
     this.#audio = new Audio(src)
+    this.#audio.volume = 0.5
     this.#target = this.#audio.volume
-		this.#audio.loop = true
+    this.#audio.loop = true
   }
 
   play() {
@@ -44,7 +45,7 @@ export class AudioControl {
       this.#volume = 0
       this.#target = 1
       this.play()
-			this.#action = null
+      this.#action = null
     }
     if (
       this.#action === 'pause' &&
@@ -52,7 +53,7 @@ export class AudioControl {
       !this.#audio.paused
     ) {
       this.#audio.pause()
-			this.#action = null
+      this.#action = null
     }
   }
 }

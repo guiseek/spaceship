@@ -1,6 +1,7 @@
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {PerspectiveCamera, Scene, WebGLRenderer} from 'three'
 import {World} from './entities'
+import './style.css'
 
 const scene = new Scene()
 
@@ -37,4 +38,3 @@ resizeHandler()
 onresize = resizeHandler
 
 document.body.appendChild(renderer.domElement)
-document.body.style.margin = '0'

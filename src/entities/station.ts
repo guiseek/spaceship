@@ -1,3 +1,4 @@
+import {onProgress} from '../utilities'
 import {Loader} from '../core'
 import {Group} from 'three'
 
@@ -7,7 +8,7 @@ export class Station extends Group {
 
     this.name = 'Station'
 
-    Loader.loadModel('station.glb').then(({scene}) => {
+    Loader.loadModel('station.glb', onProgress('Station')).then(({scene}) => {
       this.add(scene)
     })
 
