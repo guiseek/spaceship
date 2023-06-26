@@ -1,5 +1,5 @@
 import {Group, Vector3, Quaternion} from 'three'
-import {Input, Loader} from '../core'
+import {AudioControl, Input, Loader} from '../core'
 
 export class Spaceship extends Group {
   #input = new Input()
@@ -13,11 +13,14 @@ export class Spaceship extends Group {
   #yaw = new Vector3(0, 1, 0)
   #currentRotation = new Quaternion()
 
+  #audio = new AudioControl('spaceship.mp3')
+
   constructor(position?: Vector3) {
     super()
 
     Loader.loadModel('spaceship.glb').then(({scene}) => {
       this.add(scene)
+      this.#audio.play()
     })
 
     if (position) {
@@ -33,6 +36,8 @@ export class Spaceship extends Group {
     this.rotateSmoothly(alpha)
 
     this.toForward(this.#speed)
+
+    this.#audio.update()
   }
 
   handleInput(): void {
@@ -58,6 +63,9 @@ export class Spaceship extends Group {
 
     if (this.#input.key.Space) {
       this.toBrake(this.#speed)
+      this.#audio.setVolume(0.1)
+    } else {
+      this.#audio.setVolume(1)
     }
   }
 

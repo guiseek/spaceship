@@ -29,7 +29,13 @@ export class World extends Group {
 
     this.#sunLight.position.set(0, 100, 0)
 
-    this.add(this.#sunLight, this.#hemiLight, this.#dirLight, this.#station, this.#spaceship)
+    this.add(
+      this.#sunLight,
+      this.#hemiLight,
+      this.#dirLight,
+      this.#station,
+      this.#spaceship
+    )
   }
 
   update() {
