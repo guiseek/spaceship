@@ -63,8 +63,7 @@ export class Spaceship extends Group {
     if (this.#input.key.ShiftLeft) {
       this.toForward(this.#speed)
       this.#audio.setVolume(1)
-      console.log('shift');
-      
+      console.log('shift')
     }
 
     if (this.#input.key.Space) {
@@ -72,6 +71,10 @@ export class Spaceship extends Group {
       this.#audio.setVolume(0.1)
     } else {
       this.#audio.setVolume(0.5)
+    }
+
+    this.#input.onRotation = (deviceRotation) => {
+      this.quaternion.copy(deviceRotation)
     }
   }
 

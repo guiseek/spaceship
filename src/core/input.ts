@@ -1,4 +1,17 @@
-type Action = 'r' | 'f' | 'q' | 'w' | 'e' | 's' | 'a' | 'd' | 'shiftLeft' | 'space'
+import {Euler, Quaternion} from 'three'
+import {isMobile} from '../utilities'
+
+type Action =
+  | 'r'
+  | 'f'
+  | 'q'
+  | 'w'
+  | 'e'
+  | 's'
+  | 'a'
+  | 'd'
+  | 'shiftLeft'
+  | 'space'
 type Direction = 'up' | 'right' | 'down' | 'left'
 type Arrow = Capitalize<Direction>
 type Key = Capitalize<Action>
@@ -23,10 +36,18 @@ export class Input {
     ShiftLeft: false,
   }
 
+  deviceRotation = new Quaternion()
+
+  #onRotation: Callback<Quaternion>[] = []
+  set onRotation(fn: Callback<Quaternion>) {
+    this.#onRotation.push(fn)
+  }
+
   #onKeyUp: VoidFunction[] = []
   set onKeyUp(fn: VoidFunction) {
     this.#onKeyUp.push(fn)
   }
+
   #onKeyDown: VoidFunction[] = []
   set onKeyDown(fn: VoidFunction) {
     this.#onKeyDown.push(fn)
@@ -49,6 +70,27 @@ export class Input {
       if (isKey) this.#setKey(code, true)
       if (isArrow || isKey) {
         for (const fn of this.#onKeyDown) fn()
+      }
+    }
+
+    const rotationScale = 0.04
+    const euler = new Euler()
+
+    if (isMobile() && DeviceOrientationEvent) {
+      ondeviceorientation = ({gamma, alpha, beta}) => {
+        if (gamma && beta && alpha) {
+          const rotationX = beta * rotationScale
+          const rotationY = alpha * rotationScale
+          const rotationZ = gamma * rotationScale
+
+          euler.set(rotationX, rotationY, rotationZ, 'XYZ')
+
+          this.deviceRotation.setFromEuler(euler)
+
+          for (const cb of this.#onRotation) {
+            cb(this.deviceRotation)
+          }
+        }
       }
     }
   }
