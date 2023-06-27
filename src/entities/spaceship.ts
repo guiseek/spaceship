@@ -1,6 +1,7 @@
 import {Group, Vector3, Quaternion} from 'three'
 import {AudioControl, Input, Loader} from '../core'
 import {isMobile, onProgress} from '../utilities'
+import {Weapon} from './weapon'
 
 export class Spaceship extends Group {
   #input = new Input()
@@ -14,6 +15,8 @@ export class Spaceship extends Group {
   #yaw = new Vector3(0, 1, 0)
   #currentRotation = new Quaternion()
 
+  #weapon = new Weapon()
+
   #audio = new AudioControl('spaceship.mp3')
 
   constructor(position?: Vector3) {
@@ -22,6 +25,9 @@ export class Spaceship extends Group {
     Loader.loadModel('spaceship.glb', onProgress('Spaceship')).then(
       ({scene}) => {
         this.add(scene)
+
+        this.add(this.#weapon)
+
         this.#audio.play()
       }
     )
@@ -29,22 +35,26 @@ export class Spaceship extends Group {
     if (position) {
       this.position.copy(position)
     }
-  }
-
-  update(deltaTime: number) {
-    const alpha = Math.min(4 * deltaTime, 1)
 
     if (isMobile()) {
       this.#input.onRotation = (deviceRotation) => {
         this.#currentRotation.copy(deviceRotation)
       }
-    } else {
-      this.handleInput()
     }
+
+    onclick = () => this.#weapon.shoot()
+  }
+
+  update(deltaTime: number) {
+    const alpha = Math.min(4 * deltaTime, 1)
+
+    this.handleInput()
 
     this.rotateSmoothly(alpha)
 
     this.toForward(this.#speed)
+
+    this.#weapon.update(deltaTime)
 
     this.#audio.update()
   }
@@ -69,7 +79,6 @@ export class Spaceship extends Group {
     if (this.#input.key.ShiftLeft) {
       this.toForward(this.#speed)
       this.#audio.setVolume(1)
-      console.log('shift')
     }
 
     if (this.#input.key.Space) {
