@@ -11,10 +11,12 @@ import {
 import {SAPBroadphase, World as WorldCannon} from 'cannon-es'
 import {Spaceship} from './spaceship'
 import {Station} from './station'
+import { Octree } from 'three/examples/jsm/math/Octree.js'
 
 export class World extends Group {
   #clock = new Clock()
-  #station = new Station()
+  #octree = new Octree()
+  #station = new Station(this.#octree)
   #spaceship = new Spaceship(new Vector3(10, 10, 10))
   #sunLight = new DirectionalLight(0xffffff, 1)
   #dirLight = new SpotLight(0xffffff, 0.8, 7, 0.8, 1, 1)
@@ -40,8 +42,8 @@ export class World extends Group {
   }
 
   #initialize() {
-    this.controls.maxDistance = 50
-    this.controls.minDistance = 10
+    this.controls.maxDistance = 60
+    this.controls.minDistance = 30
 
     this.#sunLight.position.set(-36.7376, 33.1402, 6.42296)
 
@@ -65,6 +67,7 @@ export class World extends Group {
 
     const delta = this.#clock.getDelta()
     this.#spaceship.update(delta)
+    // this.#spaceship.collision(this.#octree)
 
     this.controls.target = this.#spaceship.position
   }

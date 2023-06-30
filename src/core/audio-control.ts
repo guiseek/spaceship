@@ -6,6 +6,10 @@ export class AudioControl {
   #audioContext
   #audioSource?: AudioBufferSourceNode
 
+  get connected() {
+    return this.#audioSource?.context.state === 'running'
+  }
+
   constructor() {
     this.#target = 1
     this.#audioContext = new AudioContext()

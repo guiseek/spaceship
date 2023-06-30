@@ -14,6 +14,12 @@ export class Input {
     ShiftLeft: false,
   }
 
+  #touched = false
+  #onTouched: VoidFunction[] = []
+  set onTouched(fn: VoidFunction) {
+    this.#onTouched.push(fn)
+  }
+
   readonly deviceRotation = new Quaternion()
 
   #onRotation: Callback<Quaternion>[] = []
@@ -66,6 +72,10 @@ export class Input {
 
   #onKeyDownFn = ({code}: KeyboardEvent) => {
     if (this.#validateKey(code)) {
+      if (!this.#touched) {
+        for (const fn of this.#onTouched) fn()
+      }
+      
       this.#setKey(code, true)
       for (const fn of this.#onKeyDown) fn()
     }

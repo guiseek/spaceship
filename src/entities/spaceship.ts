@@ -1,4 +1,4 @@
-import {getAlpha, isMobile, onProgress} from '../utilities'
+import {isMobile, onProgress} from '../utilities'
 import {AudioControl, Input, Loader} from '../core'
 import {Weapon} from './weapon'
 import {
@@ -8,19 +8,22 @@ import {
   AnimationMixer,
   AnimationAction,
 } from 'three'
+import {Capsule} from 'three/examples/jsm/math/Capsule.js'
+import {Octree} from 'three/examples/jsm/math/Octree.js'
 
 export class Spaceship extends Group {
   name = 'spaceship'
 
   #speed = 2
-  #maxSpeed = 6
-  #minSpeed = 1
+  #maxSpeed = 8
+  #minSpeed = 2
   #acceleration = 0.2
 
   #rotationAngle = 0.04
   #yaw = new Vector3(0, 1, 0)
   #currentRotation = new Quaternion()
 
+  #collider = new Capsule(new Vector3(0, 0.35, 0), new Vector3(0, 1, 0), 0.35)
   #weapon = new Weapon()
 
   #input = new Input()
@@ -53,34 +56,51 @@ export class Spaceship extends Group {
     }
     this.#activateActions(0.3)
 
-    this.#audio.connect(`engine-01.wav`)
-
     if (isMobile()) {
       this.#input.onRotation = (deviceRotation) => {
         this.#currentRotation.copy(deviceRotation)
       }
     }
 
-    onclick = () => this.#weapon.shoot()
+    this.#input.onTouched = () => {
+      if (!this.#audio.connected) {
+        this.#audio.connect(`engine-01.wav`)
+      }
+    }
+    onclick = () => {
+      this.#weapon.shoot()
+    }
   }
 
   explode() {
     console.log('morreu')
   }
 
-  update(delta: number) {
-    const alpha = getAlpha(delta)
+  collision(octree: Octree) {
+    const result = octree.capsuleIntersect(this.#collider)
 
+    if (result) {
+      console.log(result)
+    }
+  }
+
+  update(delta: number) {
     this.#handleInput()
 
-    this.#rotateSmoothly(alpha)
+    if (this.#audio.connected) {
+      // const alpha = getAlpha(delta)
 
-    this.#toForward(this.#speed)
+      // this.#rotateSmoothly(alpha)
 
-    this.#weapon.update(delta)
+      this.#toForward(this.#speed)
 
-    if (this.#mixer) {
-      this.#mixer.update(delta)
+      // this.#collider.translate(this.position)
+
+      this.#weapon.update(delta)
+
+      if (this.#mixer) {
+        this.#mixer.update(delta)
+      }
     }
 
     this.#audio.update()
@@ -151,7 +171,6 @@ export class Spaceship extends Group {
   #toLeft(angle: number) {
     const quaternion = new Quaternion().setFromAxisAngle(this.#yaw, angle)
     this.#currentRotation.multiply(quaternion)
-    // this.#currentRotation.z -= angle
     this.rotateZ(-angle)
   }
 
@@ -161,11 +180,11 @@ export class Spaceship extends Group {
     this.rotateZ(angle)
   }
 
-  #rotateSmoothly(alpha: number) {
-    const quaternion = new Quaternion()
-    quaternion.slerpQuaternions(this.quaternion, this.#currentRotation, alpha)
-    this.quaternion.copy(quaternion)
-  }
+  // #rotateSmoothly(alpha: number) {
+  //   const quaternion = new Quaternion()
+  //   quaternion.slerpQuaternions(this.quaternion, this.#currentRotation, alpha)
+  //   this.quaternion.copy(quaternion)
+  // }
 
   #toForward(speed = 0) {
     const currentSpeed = Math.min(speed + this.#acceleration, this.#maxSpeed)
