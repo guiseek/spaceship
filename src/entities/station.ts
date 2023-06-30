@@ -3,12 +3,14 @@ import {Loader} from '../core'
 import {Group} from 'three'
 
 export class Station extends Group {
+  name = 'station'
+
   constructor() {
     super()
 
-    this.name = 'Station'
+    const onLoad = onProgress(this.name)
 
-    Loader.loadModel('station.glb', onProgress('Station')).then(({scene}) => {
+    Loader.load(`${this.name}.glb`, onLoad).then(({scene}) => {
       this.add(scene)
     })
 

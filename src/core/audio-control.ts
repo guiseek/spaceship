@@ -1,59 +1,64 @@
+type AudioFilePath = `${string}.${'mp3' | 'ogg' | 'wav'}`
+
 export class AudioControl {
-  #audio
-
   #target
+  #audioGain
+  #audioContext
+  #audioSource?: AudioBufferSourceNode
 
-  get #volume() {
-    return this.#audio.volume
+  constructor() {
+    this.#target = 1
+    this.#audioContext = new AudioContext()
+    this.#audioGain = this.#audioContext.createGain()
   }
 
-  set #volume(value: number) {
-    this.#audio.volume = value
+  connect(src: AudioFilePath) {
+    this.#fetchBuffer(src)
+      .then(this.#decodeSource)
+      .then((source) => {
+        this.#audioSource = source
+        this.#audioSource.loop = true
+        this.#audioSource.connect(this.#audioGain)
+        this.#audioGain.connect(this.#audioContext.destination)
+        this.#audioSource.start()
+      })
   }
 
-  #action: 'play' | 'pause' | null = null
-
-  constructor(src: string) {
-    this.#audio = new Audio(src)
-    this.#audio.volume = 0.5
-    this.#target = this.#audio.volume
-    this.#audio.loop = true
-  }
-
-  play() {
-    return this.#audio.play()
-  }
-
-  setVolume(value: number) {
+  setGain(value: number) {
     this.#target = value
   }
 
   update() {
-    if (this.#volume < this.#target) {
-      this.#volume += 0.03
+    if (this.#audioGain.gain.value <= this.#target) {
+      this.#audioGain.gain.value += 0.02
     }
 
-    if (this.#volume > this.#target) {
-      this.#volume -= 0.03
+    if (this.#audioGain.gain.value >= this.#target) {
+      this.#audioGain.gain.value -= 0.02
     }
 
-    if (!this.#audio.paused && this.#action === 'pause') {
-      this.#target = 0
+    if (this.#audioSource) {
+      this.#audioSource.playbackRate.value = this.#audioGain.gain.value * 2
     }
+  }
 
-    if (this.#audio.paused && this.#action === 'play') {
-      this.#volume = 0
-      this.#target = 1
-      this.play()
-      this.#action = null
+  destroy() {
+    if (this.#audioSource) {
+      this.#audioSource.stop()
+      this.#audioSource.disconnect()
     }
-    if (
-      this.#action === 'pause' &&
-      this.#volume === this.#target &&
-      !this.#audio.paused
-    ) {
-      this.#audio.pause()
-      this.#action = null
-    }
+    this.#audioContext.close()
+  }
+
+  #decodeSource = async (buffer: ArrayBuffer) => {
+    return this.#audioContext.decodeAudioData(buffer).then((audioBuffer) => {
+      const audioSource = this.#audioContext.createBufferSource()
+      audioSource.buffer = audioBuffer
+      return audioSource
+    })
+  }
+
+  #fetchBuffer = async (url: string) => {
+    return fetch(url).then((response) => response.arrayBuffer())
   }
 }

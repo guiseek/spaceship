@@ -32,35 +32,42 @@ export class Input {
   }
 
   constructor() {
-    onkeyup = ({code}) => {
-      if (this.#validateKey(code)) {
-        this.#setKey(code, false)
-        for (const fn of this.#onKeyUp) fn()
-      }
-    }
-
-    onkeydown = ({code}) => {
-      if (this.#validateKey(code)) {
-        this.#setKey(code, true)
-        for (const fn of this.#onKeyDown) fn()
-      }
-    }
+    onkeyup = this.#onKeyUpFn
+    onkeydown = this.#onKeyDownFn
 
     if (isMobile() && DeviceOrientationEvent) {
       const scale = 0.04
       const euler = new Euler()
 
-      ondeviceorientation = ({beta: x, alpha: z, gamma: y}) => {
-        if (y && x && z) {
-          euler.set(x * scale, y * scale, z * scale, 'XYZ')
+      ondeviceorientation = this.#onDeviceOrientationFn(euler, scale)
+    }
+  }
 
-          this.deviceRotation.setFromEuler(euler)
+  #onDeviceOrientationFn = (euler: Euler, scale: number) => {
+    return ({beta: x, alpha: z, gamma: y}: DeviceOrientationEvent) => {
+      if (y && x && z) {
+        euler.set(x * scale, y * scale, z * scale, 'XYZ')
 
-          for (const cb of this.#onRotation) {
-            cb(this.deviceRotation)
-          }
+        this.deviceRotation.setFromEuler(euler)
+
+        for (const cb of this.#onRotation) {
+          cb(this.deviceRotation)
         }
       }
+    }
+  }
+
+  #onKeyUpFn = ({code}: KeyboardEvent) => {
+    if (this.#validateKey(code)) {
+      this.#setKey(code, false)
+      for (const fn of this.#onKeyUp) fn()
+    }
+  }
+
+  #onKeyDownFn = ({code}: KeyboardEvent) => {
+    if (this.#validateKey(code)) {
+      this.#setKey(code, true)
+      for (const fn of this.#onKeyDown) fn()
     }
   }
 

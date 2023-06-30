@@ -8,7 +8,7 @@ const scene = new Scene()
 const camera = new PerspectiveCamera(45, innerWidth / innerHeight, 10, 10000000)
 const renderer = new WebGLRenderer({antialias: true})
 renderer.setPixelRatio(devicePixelRatio)
-renderer.setClearColor(0x000006, 1)
+// renderer.setClearColor(0xffffff, 1)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -18,14 +18,14 @@ controls.update()
 
 scene.add(world)
 
-const animate = () => {
-  world.update()
+const animate = (timeStep: number) => {
+  world.update(timeStep)
   controls.update()
   renderer.render(scene, camera)
   requestAnimationFrame(animate)
 }
 
-animate()
+animate(1)
 
 const resizeHandler = () => {
   const {innerHeight, innerWidth} = window
