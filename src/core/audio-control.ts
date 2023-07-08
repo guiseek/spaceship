@@ -1,22 +1,22 @@
 type AudioFilePath = `${string}.${'mp3' | 'ogg' | 'wav'}`
 
 export class AudioControl {
-  #target
-  #audioGain
-  #audioContext
+  #target!: number
+  #audioGain!: GainNode
+  #audioContext!: AudioContext
   #audioSource?: AudioBufferSourceNode
 
   get connected() {
     return this.#audioSource?.context.state === 'running'
   }
 
-  constructor() {
+  constructor() {}
+
+  connect(src: AudioFilePath) {
     this.#target = 1
     this.#audioContext = new AudioContext()
     this.#audioGain = this.#audioContext.createGain()
-  }
 
-  connect(src: AudioFilePath) {
     this.#fetchBuffer(src)
       .then(this.#decodeSource)
       .then((source) => {
@@ -33,6 +33,8 @@ export class AudioControl {
   }
 
   update() {
+    if (!this.#audioGain) return
+    
     if (this.#audioGain.gain.value <= this.#target) {
       this.#audioGain.gain.value += 0.02
     }

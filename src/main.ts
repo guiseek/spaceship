@@ -1,7 +1,9 @@
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {PerspectiveCamera, Scene, WebGLRenderer} from 'three'
 import {World} from './entities'
-import './style.css'
+import {dialog} from './elements'
+import './style.scss'
+import {timeOut} from './utilities'
 
 const scene = new Scene()
 
@@ -25,8 +27,6 @@ const animate = (timeStep: number) => {
   requestAnimationFrame(animate)
 }
 
-animate(1)
-
 const resizeHandler = () => {
   const {innerHeight, innerWidth} = window
   renderer.setSize(innerWidth, innerHeight)
@@ -37,4 +37,11 @@ const resizeHandler = () => {
 resizeHandler()
 onresize = resizeHandler
 
-document.body.appendChild(renderer.domElement)
+document.body.append(renderer.domElement, dialog)
+
+dialog.onclose = () => {
+  timeOut(() => {
+    dialog.remove()
+    animate(1)
+  }, 0.5)
+}

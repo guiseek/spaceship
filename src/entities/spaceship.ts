@@ -56,14 +56,14 @@ export class Spaceship extends Group {
     }
     this.#activateActions(0.3)
 
+    this.#input.onTouched = () => {
+      this.#audio.connect(`engine-01.wav`)
+    }
+
     if (isMobile()) {
       this.#input.onRotation = (deviceRotation) => {
         this.#currentRotation.copy(deviceRotation)
       }
-    }
-
-    if (!this.#audio.connected) {
-      this.#audio.connect(`engine-01.wav`)
     }
 
     onclick = () => {
@@ -86,20 +86,11 @@ export class Spaceship extends Group {
   update(delta: number) {
     this.#handleInput()
 
-    if (this.#audio.connected) {
-      // const alpha = getAlpha(delta)
+    this.#toForward(this.#speed)
+    this.#weapon.update(delta)
 
-      // this.#rotateSmoothly(alpha)
-
-      this.#toForward(this.#speed)
-
-      // this.#collider.translate(this.position)
-
-      this.#weapon.update(delta)
-
-      if (this.#mixer) {
-        this.#mixer.update(delta)
-      }
+    if (this.#mixer) {
+      this.#mixer.update(delta)
     }
 
     this.#audio.update()

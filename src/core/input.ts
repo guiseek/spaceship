@@ -59,6 +59,15 @@ export class Input {
         for (const cb of this.#onRotation) {
           cb(this.deviceRotation)
         }
+
+        if (!this.#touched) {
+          console.log('touched')
+
+          for (const fn of this.#onTouched) {
+            this.#touched = true
+            fn()
+          }
+        }
       }
     }
   }
@@ -73,9 +82,10 @@ export class Input {
   #onKeyDownFn = ({code}: KeyboardEvent) => {
     if (this.#validateKey(code)) {
       if (!this.#touched) {
+        this.#touched = true
         for (const fn of this.#onTouched) fn()
       }
-      
+
       this.#setKey(code, true)
       for (const fn of this.#onKeyDown) fn()
     }
