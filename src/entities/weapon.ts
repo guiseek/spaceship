@@ -22,7 +22,7 @@ export class Weapon extends Group {
     if (this.parent) {
       if (!this.#aim) {
         this.#aim = new Mesh(
-          new TorusGeometry(0.6, 0.2, 2, 20),
+          new TorusGeometry(0.4, 0.05, 2, 20),
           new MeshBasicMaterial({color: 0x00ff00})
         )
         this.parent.add(this.#aim)

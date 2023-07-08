@@ -19,7 +19,7 @@ export class Spaceship extends Group {
   #minSpeed = 2
   #acceleration = 0.2
 
-  #rotationAngle = 0.04
+  #rotationAngle = 0.03
   #yaw = new Vector3(0, 1, 0)
   #currentRotation = new Quaternion()
 
@@ -62,11 +62,10 @@ export class Spaceship extends Group {
       }
     }
 
-    this.#input.onTouched = () => {
-      if (!this.#audio.connected) {
-        this.#audio.connect(`engine-01.wav`)
-      }
+    if (!this.#audio.connected) {
+      this.#audio.connect(`engine-01.wav`)
     }
+
     onclick = () => {
       this.#weapon.shoot()
     }
