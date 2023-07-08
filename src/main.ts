@@ -1,9 +1,9 @@
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {PerspectiveCamera, Scene, WebGLRenderer} from 'three'
-import {World} from './entities'
-import {dialog} from './elements'
-import './style.scss'
 import {timeOut} from './utilities'
+import {dialog} from './elements'
+import {World} from './entities'
+import './style.scss'
 
 const scene = new Scene()
 

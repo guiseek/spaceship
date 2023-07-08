@@ -1,5 +1,5 @@
 import {Euler, Quaternion} from 'three'
-import {isMobile} from '../utilities'
+import {create, isMobile} from '../utilities'
 
 type Action = 'w' | 'a' | 's' | 'd' | 'shiftLeft' | 'space'
 type Key = Capitalize<Action>
@@ -12,6 +12,19 @@ export class Input {
     D: false,
     Space: false,
     ShiftLeft: false,
+  }
+
+  #button = {
+    Space: create(
+      'button',
+      {ariaLabel: 'brake'},
+      create('img', {src: 'brake.svg'})
+    ),
+    ShiftLeft: create(
+      'button',
+      {ariaLabel: 'speed up'},
+      create('img', {src: 'speed.svg'})
+    ),
   }
 
   #touched = false
@@ -46,6 +59,43 @@ export class Input {
       const euler = new Euler()
 
       ondeviceorientation = this.#onDeviceOrientationFn(euler, scale)
+
+      this.#button.Space.ontouchstart = () => {
+        this.#onKeyDownFn(
+          new KeyboardEvent('keydown', {
+            code: 'Space',
+            key: ' ',
+          })
+        )
+      }
+      this.#button.ShiftLeft.ontouchstart = () => {
+        this.#onKeyDownFn(
+          new KeyboardEvent('keydown', {
+            code: 'ShiftLeft',
+            key: 'Shift',
+          })
+        )
+      }
+      this.#button.Space.ontouchend = () => {
+        this.#onKeyUpFn(
+          new KeyboardEvent('keyup', {
+            code: 'Space',
+            key: ' ',
+          })
+        )
+      }
+      this.#button.ShiftLeft.ontouchend = () => {
+        this.#onKeyUpFn(
+          new KeyboardEvent('keyup', {
+            code: 'ShiftLeft',
+            key: 'Shift',
+          })
+        )
+      }
+
+      document.body.append(
+        create('nav', {}, this.#button.Space, this.#button.ShiftLeft)
+      )
     }
   }
 
@@ -61,8 +111,6 @@ export class Input {
         }
 
         if (!this.#touched) {
-          console.log('touched')
-
           for (const fn of this.#onTouched) {
             this.#touched = true
             fn()

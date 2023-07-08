@@ -1,4 +1,4 @@
-import {isMobile, onProgress} from '../utilities'
+import {getAlpha, isMobile, onProgress} from '../utilities'
 import {AudioControl, Input, Loader} from '../core'
 import {Weapon} from './weapon'
 import {
@@ -60,10 +60,10 @@ export class Spaceship extends Group {
       this.#audio.connect(`engine-01.wav`)
     }
 
+    this.#input.onRotation = (deviceRotation) => {
+      this.#currentRotation.copy(deviceRotation)
+    }
     if (isMobile()) {
-      this.#input.onRotation = (deviceRotation) => {
-        this.#currentRotation.copy(deviceRotation)
-      }
     }
 
     onclick = () => {
@@ -88,6 +88,10 @@ export class Spaceship extends Group {
 
     this.#toForward(this.#speed)
     this.#weapon.update(delta)
+
+    if (isMobile()) {
+      this.#rotateSmoothly(getAlpha(delta))
+    }
 
     if (this.#mixer) {
       this.#mixer.update(delta)
@@ -170,11 +174,11 @@ export class Spaceship extends Group {
     this.rotateZ(angle)
   }
 
-  // #rotateSmoothly(alpha: number) {
-  //   const quaternion = new Quaternion()
-  //   quaternion.slerpQuaternions(this.quaternion, this.#currentRotation, alpha)
-  //   this.quaternion.copy(quaternion)
-  // }
+  #rotateSmoothly(alpha: number) {
+    const quaternion = new Quaternion()
+    quaternion.slerpQuaternions(this.quaternion, this.#currentRotation, alpha)
+    this.quaternion.copy(quaternion)
+  }
 
   #toForward(speed = 0) {
     const currentSpeed = Math.min(speed + this.#acceleration, this.#maxSpeed)

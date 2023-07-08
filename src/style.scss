@@ -31,6 +31,21 @@ footer label {
   gap: 8px;
 }
 
+nav {
+  display: flex;
+  justify-content: space-between;
+  position: fixed;;
+  width: calc(100% - 80px);
+  padding: 40px;
+  bottom: 0px;
+
+  button {
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+  }
+}
+
 dialog {
   color: #f9f9f9;
   background-color: #111111;
